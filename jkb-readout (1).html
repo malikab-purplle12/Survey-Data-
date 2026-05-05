@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>JKB Concept Test — Readout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  /* ==========  RESET  ========== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  button { font: inherit; cursor: pointer; border: none; background: none; }
+
+  /* ==========  GLOBAL TOKENS (NEUTRAL SHELL)  ========== */
+  :root {
+    /* Editorial / neutral shell — used on Home, Methodology, Pricing, Closing */
+    --paper: #f4f0e8;        /* warm parchment */
+    --paper-deep: #ebe5d6;
+    --ink: #1c1a17;
+    --ink-soft: #4a463e;
+    --ink-mute: #8a8478;
+    --rule: #d4cdba;
+    --accent: #6b1c2c;       /* deep berry — research authority */
+    --accent-warm: #c2945c;  /* mustard amber */
+    --accent-soft: #e8dcc8;
+  }
+
+  /* ==========  KRYSTAL BLOOM PAGE THEME  ========== */
+  .theme-kb {
+    --paper: #f5ecf0;
+    --paper-deep: #ebd9e1;
+    --ink: #2d1a23;
+    --ink-soft: #5a3949;
+    --ink-mute: #9a7d8d;
+    --rule: #e7cdd6;
+    --accent: #8b3a52;
+    --accent-warm: #c294a4;
+    --accent-soft: #f8e2eb;
+  }
+
+  /* ==========  INDIPOP MALMAL PAGE THEME  ========== */
+  .theme-ip {
+    --paper: #efe9dc;        /* malmal cream */
+    --paper-deep: #e3dcc8;
+    --ink: #2a261d;
+    --ink-soft: #4f4838;
+    --ink-mute: #8b8470;
+    --rule: #cec5ad;
+    --accent: #7b5a3a;       /* warm earth */
+    --accent-warm: #b89466;
+    --accent-soft: #d8d1ba;  /* dusty sage adjacent */
+  }
+
+  /* ==========  TOP NAV  ========== */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--paper);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background .45s ease, border-color .45s ease;
+  }
+  .nav-brand {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+  }
+  .nav-brand b { color: var(--accent); font-weight: 600; }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .nav-links a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    padding-bottom: 3px;
+    border-bottom: 1px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .nav-mobile-toggle { display: none; }
+
+  @media (max-width: 820px) {
+    .nav { padding: 12px 18px; flex-wrap: wrap; }
+    .nav-mobile-toggle {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--ink);
+    }
+    .nav-links {
+      display: none;
+      width: 100%;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 14px;
+      margin-top: 12px;
+      border-top: 1px solid var(--rule);
+    }
+    .nav-links.open { display: flex; }
+  }
+
+  /* ==========  PAGES ROUTING  ========== */
+  .page { display: none; padding-top: 64px; min-height: 100vh; }
+  .page.active { display: block; animation: fadeIn .5s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  /* ==========  TYPE  ========== */
+  .display, h1, h2, h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  h1 { font-size: clamp(2.4rem, 6vw, 5rem); line-height: 1.02; font-weight: 400; }
+  h2 { font-size: clamp(1.7rem, 3.5vw, 2.6rem); line-height: 1.1; font-weight: 500; }
+  h3 { font-size: clamp(1.1rem, 1.8vw, 1.45rem); line-height: 1.2; font-weight: 500; }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: inline-block;
+  }
+  .lede {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.15rem, 1.6vw, 1.4rem);
+    line-height: 1.45;
+    color: var(--ink-soft);
+    font-weight: 300;
+  }
+
+  /* ==========  CONTAINERS  ========== */
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  .wrap-narrow { max-width: 880px; margin: 0 auto; padding: 0 32px; }
+  section { padding: 80px 0; }
+  @media (max-width: 700px) {
+    .wrap, .wrap-narrow { padding: 0 20px; }
+    section { padding: 56px 0; }
+  }
+
+  /* ==========  HOME / HERO  ========== */
+  .hero {
+    background: var(--paper);
+    padding: 80px 0 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 60px;
+    align-items: end;
+  }
+  @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .hero h1 .word {
+    display: inline-block;
+    opacity: 0;
+    animation: heroIn .9s ease forwards;
+  }
+  .hero h1 .word:nth-child(1) { animation-delay: 0.05s; }
+  .hero h1 .word:nth-child(2) { animation-delay: 0.18s; }
+  .hero h1 .word:nth-child(3) { animation-delay: 0.31s; }
+  .hero h1 .word:nth-child(4) { animation-delay: 0.44s; }
+  .hero h1 .word:nth-child(5) { animation-delay: 0.57s; }
+  @keyframes heroIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+  .hero-strapline { color: var(--accent); font-style: italic; }
+
+  .stat-strip {
+    margin-top: 80px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+  }
+  .stat-strip > div {
+    padding: 28px 22px;
+    border-right: 1px solid var(--rule);
+  }
+  .stat-strip > div:last-child { border-right: none; }
+  @media (max-width: 700px) {
+    .stat-strip { grid-template-columns: repeat(2, 1fr); }
+    .stat-strip > div:nth-child(2) { border-right: none; }
+    .stat-strip > div:nth-child(1), .stat-strip > div:nth-child(2) { border-bottom: 1px solid var(--rule); }
+  }
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .stat-num span { color: var(--accent); }
+  .stat-label {
+    margin-top: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+
+  /* ==========  EXPERIENCE — IFRAME GALLERY  ========== */
+  .experience-section {
+    background: var(--paper-deep);
+    padding: 100px 0;
+  }
+  .exp-intro { max-width: 720px; margin-bottom: 50px; }
+  .exp-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .exp-tab-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .exp-tab-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    margin-right: 14px;
+    align-self: center;
+  }
+  .exp-tab {
+    padding: 9px 16px;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .exp-tab.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .exp-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+  .exp-frame-wrap {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px -20px rgba(28, 26, 23, 0.15);
+  }
+  .exp-frame-bar {
+    background: var(--paper);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .exp-dots { display: flex; gap: 6px; }
+  .exp-dots span {
+    width: 11px; height: 11px; border-radius: 50%;
+    background: var(--rule);
+  }
+  .exp-url {
+    flex: 1;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    background: var(--paper-deep);
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-left: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .exp-frame {
+    width: 100%;
+    height: 720px;
+    border: none;
+    background: #fff;
+    display: block;
+  }
+  .exp-open {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--accent);
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: background .2s, color .2s;
+  }
+  .exp-open:hover { background: var(--accent); color: var(--paper); }
+
+  @media (max-width: 700px) {
+    .exp-frame { height: 540px; }
+    .exp-url { display: none; }
+  }
+
+  /* ==========  CARDS / GRIDS  ========== */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  @media (max-width: 900px) {
+    .grid-2 { grid-template-columns: 1fr; gap: 28px; }
+    .grid-3 { grid-template-columns: 1fr; gap: 24px; }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  }
+
+  .card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 28px;
+    border-radius: 4px;
+  }
+
+  /* ==========  PRICING TABLE  ========== */
+  .price-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Inter', sans-serif;
+  }
+  .price-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    text-align: left;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ink);
+    font-weight: 500;
+  }
+  .price-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 15px;
+  }
+  .price-table .sku { font-family: 'Fraunces', serif; font-weight: 500; font-size: 17px; }
+  .price-table .price-cell { font-family: 'DM Mono', monospace; color: var(--accent); }
+
+  /* ==========  PRICE BARS  ========== */
+  .barchart-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 80px;
+    gap: 16px;
+    align-items: center;
+    padding: 10px 0;
+  }
+  .barchart-label {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  .barchart-bar-wrap {
+    height: 20px;
+    background: var(--paper-deep);
+    border-radius: 0;
+    overflow: hidden;
+  }
+  .barchart-bar {
+    height: 100%;
+    background: var(--accent);
+    transform-origin: left center;
+    animation: barGrow 1.2s cubic-bezier(.22,.61,.36,1) forwards;
+    transform: scaleX(0);
+  }
+  @keyframes barGrow { to { transform: scaleX(1); } }
+  .barchart-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    text-align: right;
+  }
+  .barchart-n {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-mute);
+    margin-left: 6px;
+  }
+  .thin-sample { opacity: 0.55; }
+  .thin-sample .barchart-bar { background: var(--ink-mute); }
+
+  /* ==========  CALLOUTS / PULLQUOTES  ========== */
+  .pullquote {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+    line-height: 1.4;
+    font-style: italic;
+    color: var(--ink);
+    padding: 24px 0 24px 28px;
+    border-left: 2px solid var(--accent);
+    margin: 24px 0;
+  }
+  .pullquote-cite {
+    display: block;
+    margin-top: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-style: normal;
+    color: var(--ink-mute);
+  }
+
+  .callout {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 22px 26px;
+    margin: 24px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .callout-body {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    line-height: 1.45;
+    color: var(--ink);
+  }
+
+  /* ==========  KB SECTION HERO (PRISMATIC)  ========== */
+  .kb-hero {
+    position: relative;
+    padding: 120px 0 80px;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255, 200, 220, 0.55) 0%, transparent 45%),
+      radial-gradient(circle at 80% 60%, rgba(200, 220, 255, 0.45) 0%, transparent 50%),
+      radial-gradient(circle at 50% 90%, rgba(230, 200, 255, 0.4) 0%, transparent 50%),
+      linear-gradient(135deg, #f8e9f0 0%, #efe2ed 50%, #e8e4f2 100%);
+    overflow: hidden;
+  }
+  .kb-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      conic-gradient(from 90deg at 50% 50%,
+        rgba(255, 215, 230, 0.3) 0deg,
+        rgba(220, 230, 255, 0.3) 90deg,
+        rgba(240, 220, 255, 0.3) 180deg,
+        rgba(255, 235, 220, 0.3) 270deg,
+        rgba(255, 215, 230, 0.3) 360deg);
+    mix-blend-mode: screen;
+    opacity: 0.6;
+    animation: prismDrift 25s ease-in-out infinite;
+  }
+  @keyframes prismDrift {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+  }
+  .kb-hero > .wrap { position: relative; z-index: 1; }
+
+  /* ==========  IP MALMAL HERO (DUSTY HANDLOOM)  ========== */
+  .ip-hero {
+    position: relative;
+    padding: 120px 0 80px;
+    background:
+      radial-gradient(ellipse at 25% 40%, rgba(193, 162, 197, 0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 75% 50%, rgba(177, 191, 156, 0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 80%, rgba(212, 192, 142, 0.16) 0%, transparent 50%),
+      linear-gradient(180deg, #efe9dc 0%, #e8dfc8 100%);
+    overflow: hidden;
+  }
+  .ip-hero::before {
+    /* film grain */
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.4 0 0 0 0 0.36 0 0 0 0 0.28 0 0 0 0.18 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .ip-hero > .wrap { position: relative; z-index: 1; }
+
+  /* ==========  SENTIMENT NUMBER GRID  ========== */
+  .sentiment-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-top: 40px;
+  }
+  .sentiment-grid > div {
+    padding: 32px 22px;
+    border-right: 1px dashed var(--rule);
+  }
+  .sentiment-grid > div:last-child { border-right: none; }
+  @media (max-width: 700px) {
+    .sentiment-grid { grid-template-columns: repeat(2, 1fr); }
+    .sentiment-grid > div:nth-child(2) { border-right: none; }
+    .sentiment-grid > div:nth-child(1),
+    .sentiment-grid > div:nth-child(2) { border-bottom: 1px dashed var(--rule); }
+  }
+  .sentiment-num {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.6rem, 5.5vw, 4rem);
+    line-height: 1;
+    font-weight: 400;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+  }
+  .sentiment-label {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.35;
+    color: var(--ink-soft);
+  }
+
+  /* ==========  WORD CLOUD  ========== */
+  .wordcloud {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 50px 32px;
+    text-align: center;
+    line-height: 1.35;
+    min-height: 360px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .wordcloud .wc-word {
+    font-family: 'Fraunces', serif;
+    color: var(--accent);
+    line-height: 1.05;
+    transition: transform .25s ease, color .25s ease;
+    cursor: default;
+    white-space: nowrap;
+    padding: 0 6px;
+  }
+  .wordcloud .wc-word:hover {
+    transform: translateY(-2px);
+    color: var(--ink);
+  }
+  .wordcloud .wc-word.dim { color: var(--ink-mute); opacity: 0.7; }
+  .wordcloud-meta {
+    text-align: center;
+    margin-top: 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-mute);
+  }
+
+  /* ==========  LANGUAGE SHOWCASE (METHODOLOGY)  ========== */
+  .lang-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-top: 40px;
+  }
+  @media (max-width: 800px) { .lang-grid { grid-template-columns: 1fr; } }
+  .lang-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 28px 28px 24px;
+    border-radius: 4px;
+    transition: border-color .25s ease, transform .25s ease;
+  }
+  .lang-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .lang-card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 10px;
+  }
+  .lang-name {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .lang-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .lang-quote {
+    font-size: 17px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin-bottom: 12px;
+    /* Some scripts need a different font fallback for proper rendering */
+    font-family: 'Fraunces', 'Noto Sans Devanagari', 'Noto Sans Tamil', 'Noto Sans Malayalam', 'Noto Sans Telugu', 'Noto Sans Kannada', 'Noto Sans Bengali', sans-serif;
+  }
+  .lang-quote-en {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 14.5px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    padding-left: 14px;
+    border-left: 2px solid var(--accent-soft);
+  }
+
+  /* ==========  GEO MAP / CITY BREAKDOWN  ========== */
+  .geo-strip {
+    margin-top: 30px;
+  }
+  .geo-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: center;
+  }
+  .geo-row:last-child { border-bottom: none; }
+  .geo-store {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .geo-store .geo-city {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-mute);
+    margin-top: 3px;
+    font-weight: 400;
+  }
+  .geo-bars {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .geo-bar {
+    display: grid;
+    grid-template-columns: 60px 1fr 80px;
+    align-items: center;
+    gap: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+  }
+  .geo-bar-fill {
+    height: 14px;
+    background: var(--paper-deep);
+    overflow: hidden;
+  }
+  .geo-bar-fill > div {
+    height: 100%;
+    background: var(--accent);
+  }
+  .geo-bar-fill.lipstick > div { background: var(--accent); }
+  .geo-bar-fill.lipbalm > div { background: var(--accent-warm); }
+  .geo-bar-tag {
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .geo-bar-val {
+    text-align: right;
+    color: var(--ink);
+  }
+  @media (max-width: 700px) {
+    .geo-row { grid-template-columns: 1fr; gap: 12px; }
+    .geo-bars { grid-template-columns: 1fr; }
+  }
+
+  /* ==========  CHART CANVAS WRAPPER  ========== */
+  .chart-wrap {
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    padding: 24px;
+    border-radius: 4px;
+    margin: 30px 0;
+  }
+  .chart-canvas-wrap {
+    position: relative;
+    height: 360px;
+  }
+
+  /* ==========  CONCERN CARD  ========== */
+  .concern-card {
+    background: var(--paper);
+    border-left: 3px solid var(--accent);
+    padding: 22px 26px;
+    margin-bottom: 16px;
+    border-radius: 0 4px 4px 0;
+  }
+  .concern-stat {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 10px;
+    font-weight: 400;
+  }
+  .concern-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  /* ==========  SECTION HEADER  ========== */
+  .section-head {
+    margin-bottom: 50px;
+    max-width: 760px;
+  }
+  .section-head .eyebrow { color: var(--accent); }
+
+  /* ==========  CLOSING  ========== */
+  .closing-blocks {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 60px;
+    margin-top: 60px;
+  }
+  @media (max-width: 800px) { .closing-blocks { grid-template-columns: 1fr; } }
+  .closing-block {
+    padding: 40px 32px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+  }
+  .closing-block.kb {
+    background: linear-gradient(135deg, #f8e9f0, #efe2ed);
+  }
+  .closing-block.ip {
+    background: linear-gradient(180deg, #efe9dc 0%, #e8dfc8 100%);
+  }
+  .closing-block h3 {
+    font-size: 28px;
+    margin-bottom: 14px;
+  }
+  .closing-block .closing-line {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+  }
+  .closing-block ul {
+    list-style: none;
+    margin-top: 18px;
+  }
+  .closing-block li {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--rule);
+    font-size: 14.5px;
+    color: var(--ink);
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .closing-block li:last-child { border-bottom: none; }
+  .closing-block li b {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    min-width: 90px;
+    font-weight: 500;
+  }
+
+  /* ==========  CAVEAT LIST  ========== */
+  .caveat {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: 20px;
+    padding: 26px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .caveat:last-child { border-bottom: none; }
+  .caveat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    line-height: 1;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .caveat-title {
+    font-family: 'Fraunces', serif;
+    font-size: 19px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .caveat-body {
+    font-size: 14.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  /* ==========  FOOTER  ========== */
+  .footer {
+    padding: 40px 0;
+    border-top: 1px solid var(--rule);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    text-align: center;
+  }
+
+  /* ==========  ELEMENT MENTIONS LIST  ========== */
+  .elements {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+    margin-top: 30px;
+  }
+  @media (max-width: 700px) { .elements { grid-template-columns: 1fr; } }
+  .element-card {
+    border-top: 2px solid var(--accent);
+    padding-top: 18px;
+  }
+  .element-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .element-name {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 500;
+  }
+  .element-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .element-note {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+
+  /* ==========  STORY / SCROLL FX  ========== */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Selection color */
+  ::selection { background: var(--accent); color: var(--paper); }
+
+  /* Print: keep things sane */
+  @media print {
+    .nav, .exp-frame { display: none; }
+    .page { display: block; padding-top: 0; page-break-before: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ==========  NAV  ========== -->
+<nav class="nav" id="nav">
+  <a href="#home" class="nav-brand"><b>JKB</b> · Concept Test Readout</a>
+  <button class="nav-mobile-toggle" id="navToggle">Menu</button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#home" data-page="home">Home</a></li>
+    <li><a href="#methodology" data-page="methodology">Methodology</a></li>
+    <li><a href="#pricing" data-page="pricing">Pricing</a></li>
+    <li><a href="#krystal-bloom" data-page="krystal-bloom">Krystal Bloom</a></li>
+    <li><a href="#indipop" data-page="indipop">Indipop</a></li>
+    <li><a href="#takeaway" data-page="takeaway">Takeaway</a></li>
+  </ul>
+</nav>
+
+<!-- ============================== -->
+<!-- ==========  HOME  ============ -->
+<!-- ============================== -->
+<main class="page active" id="page-home" data-theme="">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <span class="eyebrow">Purplle · In-store concept test · 2026</span>
+          <h1>
+            <span class="word">What</span>
+            <span class="word">shoppers</span>
+            <span class="word">told</span>
+            <span class="word">us</span>
+            <span class="word hero-strapline">about Krystal Bloom &amp; Indipop.</span>
+          </h1>
+        </div>
+        <div>
+          <p class="lede">
+            Two design directions, six pricing variants, 40+ stores, eight languages.
+            <br><br>
+            207 store conversations, recorded, transcribed, translated, coded.
+            This is what they showed us.
+          </p>
+        </div>
+      </div>
+
+      <div class="stat-strip">
+        <div>
+          <div class="stat-num">207</div>
+          <div class="stat-label">Transcripts recorded</div>
+        </div>
+        <div>
+          <div class="stat-num"><span>190</span></div>
+          <div class="stat-label">Usable for analysis</div>
+        </div>
+        <div>
+          <div class="stat-num">40<span>+</span></div>
+          <div class="stat-label">Stores · 7 cities</div>
+        </div>
+        <div>
+          <div class="stat-num">8</div>
+          <div class="stat-label">Languages</div>
+        </div>
+      </div>
+
+      <p style="margin-top: 28px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.1em; text-transform: uppercase; text-align: center;">
+        Stores selected to cover the right mix of ASP bands · value catchment to premium mall
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== EXPERIENCE GALLERY (the websites consumers saw) ========== -->
+  <section class="experience-section">
+    <div class="wrap">
+      <div class="exp-intro section-head">
+        <span class="eyebrow">What shoppers actually saw</span>
+        <h2>The experience, before the survey.</h2>
+        <p class="lede" style="margin-top: 18px;">
+          Each respondent was shown one of six microsites — one of two design directions, at one of three pricing conditions. Browse them as the consumer did.
+        </p>
+      </div>
+
+      <div class="exp-tabs">
+        <span class="exp-tab-label">Direction</span>
+        <div class="exp-tab-group">
+          <button class="exp-tab active" data-dir="kb">Krystal Bloom</button>
+          <button class="exp-tab" data-dir="ip">Indipop</button>
+        </div>
+        <span class="exp-tab-label" style="margin-left: 30px;">Pricing</span>
+        <div class="exp-tab-group">
+          <button class="exp-tab active" data-price="No-Price">No Price</button>
+          <button class="exp-tab" data-price="Low-Price">Low Price</button>
+          <button class="exp-tab" data-price="High-Price">High Price</button>
+        </div>
+      </div>
+
+      <div class="exp-frame-wrap">
+        <div class="exp-frame-bar">
+          <div class="exp-dots"><span></span><span></span><span></span></div>
+          <div class="exp-url" id="expUrl">lucid-by-purplle.github.io/Krystal-Bloom-No-Price/</div>
+          <a href="#" target="_blank" rel="noopener" class="exp-open" id="expOpen">Open ↗</a>
+        </div>
+        <iframe class="exp-frame" id="expFrame" src="https://lucid-by-purplle.github.io/Krystal-Bloom-No-Price/" loading="lazy"></iframe>
+      </div>
+
+      <p style="margin-top: 18px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.1em; text-transform: uppercase;">
+        ↑ Live preview · same site shown to consumers in-store
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== AT A GLANCE ========== -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">The two-line summary</span>
+        <h2>Both directions are loved. For different reasons.</h2>
+      </div>
+      <div class="grid-2">
+        <div class="card" style="border-top: 3px solid #8b3a52;">
+          <span class="eyebrow" style="color: #8b3a52;">Krystal Bloom</span>
+          <h3 style="margin-top: 6px;">A premium signal, before they touch it.</h3>
+          <p style="margin-top: 14px; color: var(--ink-soft);">
+            33% of KB respondents reached for the word <b>"premium."</b> Only 1% said <b>"cheap."</b>
+            The crystal motif and luxe finish read as something they hadn't seen before.
+          </p>
+        </div>
+        <div class="card" style="border-top: 3px solid #7b5a3a;">
+          <span class="eyebrow" style="color: #7b5a3a;">Indipop</span>
+          <h3 style="margin-top: 6px;">Different, daily-wear, <em>theirs</em>.</h3>
+          <p style="margin-top: 14px; color: var(--ink-soft);">
+            32% volunteered <b>"different"</b> unprompted &mdash; the highest single-word lift in the study. Format experimentation lands as fresh, the colour combinations land as their own, and the whole thing reads as something that belongs in a real makeup bag.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================== -->
+<!-- ==========  METHODOLOGY  ====== -->
+<!-- ============================== -->
+<main class="page" id="page-methodology" data-theme="">
+  <section style="padding-top: 60px;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Methodology · 1 of 3</span>
+        <h1>How the conversation happened.</h1>
+        <p class="lede" style="margin-top: 24px;">
+          Monadic concept test across the Purplle store network. Each respondent saw one direction at one of three pricing conditions, and answered an open-ended six-question script. Verbatim transcripts were translated, coded for sentiment and design callouts, and aggregated.
+        </p>
+        <p class="lede" style="margin-top: 18px; font-size: 1.05rem;">
+          Stores were selected to cover the right mix of ASP bands &mdash; from value-catchment outlets to premium mall stores &mdash; so we could see how each direction lands across the spread Purplle actually sells into.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- LANGUAGE FOOTAGE -->
+  <section style="background: var(--paper-deep); padding: 80px 0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Eight languages spoken in-store</span>
+        <h2>The conversation, in its actual voice.</h2>
+        <p style="margin-top: 18px; color: var(--ink-soft); font-size: 16px;">
+          Hindi, Malayalam, Tamil, English, Telugu, Marathi, Bengali, Kannada. Real respondents, real verbatim, in their own scripts. Translated and coded after.
+        </p>
+      </div>
+
+      <div class="lang-grid">
+        <!-- Hindi -->
+        <div class="lang-card">
+          <div class="lang-card-head">
+            <span class="lang-name">Hindi</span>
+            <span class="lang-count">69 transcripts</span>
+          </div>
+          <div class="lang-quote">"और sober भी लगा। ऐसे एकदम ये नहीं है। बहुत ज्यादा।"</div>
+          <div class="lang-quote-en">"And it also felt sober. It's not, like, very much."</div>
+        </div>
+        <!-- Malayalam -->
+        <div class="lang-card">
+          <div class="lang-card-head">
+            <span class="lang-name">Malayalam</span>
+            <span class="lang-count">57 transcripts</span>
+          </div>
+          <div class="lang-quote">"പക്ഷേ quality of the product നന്നായിരിക്കണം. packaging മാത്രം പോരാ."</div>
+          <div class="lang-quote-en">"But the quality of the product should be good. Packaging alone is not enough."</div>
+        </div>
+        <!-- Tamil -->
+        <div class="lang-card">
+          <div class="lang-card-head">
+            <span class="lang-name">Tamil</span>
+            <span class="lang-count">32 transcripts</span>
+          </div>
+          <div class="lang-quote">"எனக்கு blush ரொம்ப பிடிச்சிருக்கு. shades கொஞ்சம் different ஆ இருந்தது. நல்லா இருந்தது blush."</div>
+          <div class="lang-quote-en">"I really liked the blush. The shades were a little different. The blush was nice."</div>
+        </div>
+        <!-- English -->
+        <div class="lang-card">
+          <div class="lang-card-head">
+            <span class="lang-name">English</span>
+            <span class="lang-count">28 transcripts</span>
+          </div>
+          <div class="lang-quote">"It is in diamond shape, and it has a glossy, shiny look — and it's really unique from other brands."</div>
+          <div class="lang-quote-en" style="opacity: 0.6;">— BA-only conversation, English</div>
+        </div>
+        <!-- Telugu -->
+        <div class="lang-card">
+          <div class="lang-card-head">
+            <span class="lang-name">Telugu</span>
+            <span class="lang-count">19 transcripts</span>
+          </div>
+          <div class="lang-quote">"అవి diamond shape లో ఉండడం వల్ల కొంచము ఆకర్షణీయంగా ఉన్నాయి, తీసుకోవడానికి బాగున్నాయి."</div>
+          <div class="lang-quote-en">"Because they are in a diamond shape, they look a little attractive and nice to buy."</div>
+        </div>
+        <!-- Marathi -->
+        <div class="lang-card">
+          <div class="lang-card-head">
+            <span class="lang-name">Marathi</span>
+            <span class="lang-count">4 transcripts</span>
+          </div>
+          <div class="lang-quote">"छान वाटते packaging वगैरे त्याचं आणि carry करायला easy आहे खूप ते."</div>
+          <div class="lang-quote-en">"The packaging looks nice, and it's very easy to carry."</div>
+        </div>
+        <!-- Bengali -->
+        <div class="lang-card">
+          <div class="lang-card-head">
+            <span class="lang-name">Bengali</span>
+            <span class="lang-count">1 transcript</span>
+          </div>
+          <div class="lang-quote">"হ্যাঁ, এই packagingগুলো it's very beautiful and looks luxurious."</div>
+          <div class="lang-quote-en">"Yes, these packaging designs are very beautiful and look luxurious."</div>
+        </div>
+        <!-- Kannada -->
+        <div class="lang-card">
+          <div class="lang-card-head">
+            <span class="lang-name">Kannada</span>
+            <span class="lang-count">1 transcript</span>
+          </div>
+          <div class="lang-quote">"ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ diamond ತರ ಇದೆ. use ಮಾಡಬೇಕು ಅನ್ಕೊಂತಾ ಇದೀನಿ."</div>
+          <div class="lang-quote-en">"It's very nice, it looks like a diamond. I feel like using it."</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE SCRIPT -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">The pricing methodology</span>
+        <h2>Three conditions, designed to triangulate willingness to pay.</h2>
+        <p class="lede" style="margin-top: 18px;">
+          The same direction was shown at three pricing conditions. The "No Price" condition is what makes this design more powerful than a standard test — it lets shoppers anchor themselves before we anchor them.
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card" style="border-top: 3px solid var(--accent);">
+          <span class="eyebrow">Condition 1</span>
+          <h3 style="margin-top: 6px;">No Price</h3>
+          <p style="margin-top: 14px; color: var(--ink-soft); font-size: 15px; line-height: 1.5;">
+            Shopper sees the product range with no price information. They are then asked to suggest a price band themselves. Captures unprompted willingness to pay.
+          </p>
+          <p style="margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">48 transcripts</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent);">
+          <span class="eyebrow">Condition 2</span>
+          <h3 style="margin-top: 6px;">Low Price tier</h3>
+          <p style="margin-top: 14px; color: var(--ink-soft); font-size: 15px; line-height: 1.5;">
+            Shopper sees the lower of two test pricing tiers. Establishes a floor — does the design hold up at accessible pricing, or does it feel too cheap for what it looks like?
+          </p>
+          <p style="margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">41 transcripts</p>
+        </div>
+        <div class="card" style="border-top: 3px solid var(--accent);">
+          <span class="eyebrow">Condition 3</span>
+          <h3 style="margin-top: 6px;">High Price tier</h3>
+          <p style="margin-top: 14px; color: var(--ink-soft); font-size: 15px; line-height: 1.5;">
+            Shopper sees the higher of two test pricing tiers. Tests the ceiling — does the design earn premium pricing, or does the price break consideration?
+          </p>
+          <p style="margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);">51 transcripts</p>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top: 50px;">
+        <div class="callout-title">A note on the data</div>
+        <div class="callout-body">
+          This was face-to-face, in-store, BA-mediated &mdash; the warmest possible way to do this kind of testing, and also the kind of setting where Indian shoppers rarely say "no" outright. So treat the numbers as directional, not decisive. Anywhere a sample is on the thinner side, you'll see it shown in muted grey throughout.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top: 0;">
+    <div class="wrap">
+      <div class="footer">Methodology · 1 of 3 · Next: Pricing →</div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================== -->
+<!-- ==========  PRICING  ========== -->
+<!-- ============================== -->
+<main class="page" id="page-pricing" data-theme="">
+  <section style="padding-top: 60px;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Part one · Pricing</span>
+        <h1>What shoppers were willing to pay.</h1>
+        <p class="lede" style="margin-top: 24px;">
+          Two test tiers across the SKU range, with a third "no price" condition for unprompted willingness-to-pay. The headline finding: shoppers anchor on what they are shown — and they accept it.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEST PRICE TIERS -->
+  <section style="padding-top: 0;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">The test prices</span>
+        <h2>What we showed them.</h2>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="price-table">
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Low Tier (modal)</th>
+              <th>High Tier (modal)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="sku">Lipstick</td><td class="price-cell">₹499–599</td><td class="price-cell">₹799–999</td></tr>
+            <tr><td class="sku">Lip Balm</td><td class="price-cell">₹450–499</td><td class="price-cell">₹699–899</td></tr>
+            <tr><td class="sku">Kajal / Liner</td><td class="price-cell">₹399–499</td><td class="price-cell">₹799</td></tr>
+            <tr><td class="sku">Blush</td><td class="price-cell">₹499–599</td><td class="price-cell">₹899</td></tr>
+            <tr><td class="sku">Eyeshadow</td><td class="price-cell">₹499–599</td><td class="price-cell">₹1,099</td></tr>
+            <tr><td class="sku">Skin Tint / BB</td><td class="price-cell">₹499–699</td><td class="price-cell">₹1,199</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top: 18px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.08em;">
+        Test prices reverse-engineered from BA-quoted prices in transcripts (n = 146 BA price quotes total).
+      </p>
+    </div>
+  </section>
+
+  <!-- WHAT THEY EXPECTED -->
+  <section style="background: var(--paper-deep);">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Willingness to pay</span>
+        <h2>What shoppers expected to pay.</h2>
+        <p class="lede" style="margin-top: 18px;">
+          Median expected price per SKU, across all directions. Bars in muted grey indicate samples below n=15 — those numbers are directional, not decisive.
+        </p>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-canvas-wrap" style="height: 400px;">
+          <canvas id="expectedChart"></canvas>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 30px;">
+        <div class="callout" style="background: var(--accent-soft);">
+          <div class="callout-title">Lipstick sits in the middle</div>
+          <div class="callout-body">
+            ₹750 median across 32 respondent quotes. Most shoppers (14 of 32) sat in the ₹500&ndash;699 band; only a handful reached for ₹1,000+. The category bears mid-tier pricing comfortably; premium pricing is real but earned, not assumed.
+          </div>
+        </div>
+        <div class="callout" style="background: var(--accent-soft);">
+          <div class="callout-title">Lip balm is the ceiling</div>
+          <div class="callout-body">
+            ₹700 median. 63% expected ≤₹699 &mdash; sharpest price sensitivity in the range. The category resists premium pricing in either direction.
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top: 28px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.08em; line-height: 1.6;">
+        n: Lipstick=32, Lip Balm=30, Kajal=28, Blush=26, Eyeshadow=25, Skin Tint=8.<br>
+        Skin Tint figure is provisional and shown in muted type given the thin sample.
+      </p>
+    </div>
+  </section>
+
+  <!-- HEADROOM -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Does the High tier break expectations?</span>
+        <h2>Headroom is set by the category, not the tier you show.</h2>
+        <p style="margin-top: 18px; color: var(--ink-soft); font-size: 16px; max-width: 720px;">
+          Whether shoppers were shown the Low tier or the High tier, their expected price for a category barely moved. What sets the ceiling is the category itself &mdash; how much shoppers think a kajal, a blush, an eyeshadow are worth.
+        </p>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-canvas-wrap" style="height: 400px;">
+          <canvas id="headroomChart"></canvas>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">Read this</div>
+        <div class="callout-body">
+          Showing the High tier didn't depress expectations &mdash; shoppers absorbed it. Eyeshadow, blush and kajal all carry premium pricing without losing the shopper. Sample sizes per tier are small (n=3 in some Low cells), so treat the deltas as directional. The headline holds: the category sets the ceiling, the design tier doesn't break it.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GEO -->
+  <section style="background: var(--paper-deep);">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Where you sell shapes what shoppers will pay</span>
+        <h2>Price expectation moves with ASP band.</h2>
+        <p class="lede" style="margin-top: 18px;">
+          High-ASP outlets anchor higher. Value-catchment outlets sit lower. Same SKU, same direction &mdash; up to a ₹600 spread on lipstick. Below: median expected price for Lipstick and Lip Balm at four representative stores, low-ASP to high-ASP.
+        </p>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="geo-strip">
+          <div class="geo-row">
+            <div class="geo-store">Sagarpur<span class="geo-city">Delhi · low ASP</span></div>
+            <div class="geo-bars">
+              <div class="geo-bar">
+                <span class="geo-bar-tag">Lipstick</span>
+                <div class="geo-bar-fill lipstick"><div style="width: 40%;"></div></div>
+                <span class="geo-bar-val">₹400</span>
+              </div>
+              <div class="geo-bar">
+                <span class="geo-bar-tag">Lip balm</span>
+                <div class="geo-bar-fill lipbalm"><div style="width: 60%;"></div></div>
+                <span class="geo-bar-val">₹600</span>
+              </div>
+            </div>
+          </div>
+          <div class="geo-row">
+            <div class="geo-store">Hatibagan<span class="geo-city">Kolkata · low ASP</span></div>
+            <div class="geo-bars">
+              <div class="geo-bar">
+                <span class="geo-bar-tag">Lipstick</span>
+                <div class="geo-bar-fill lipstick"><div style="width: 50%;"></div></div>
+                <span class="geo-bar-val">₹500</span>
+              </div>
+              <div class="geo-bar">
+                <span class="geo-bar-tag">Lip balm</span>
+                <div class="geo-bar-fill lipbalm"><div style="width: 50%;"></div></div>
+                <span class="geo-bar-val">₹500</span>
+              </div>
+            </div>
+          </div>
+          <div class="geo-row">
+            <div class="geo-store">Pune Xperia<span class="geo-city">Pune · mid ASP</span></div>
+            <div class="geo-bars">
+              <div class="geo-bar">
+                <span class="geo-bar-tag">Lipstick</span>
+                <div class="geo-bar-fill lipstick"><div style="width: 80%;"></div></div>
+                <span class="geo-bar-val">₹800</span>
+              </div>
+              <div class="geo-bar">
+                <span class="geo-bar-tag">Lip balm</span>
+                <div class="geo-bar-fill lipbalm"><div style="width: 70%;"></div></div>
+                <span class="geo-bar-val">₹700</span>
+              </div>
+            </div>
+          </div>
+          <div class="geo-row">
+            <div class="geo-store">Tilak Nagar<span class="geo-city">Delhi · high ASP</span></div>
+            <div class="geo-bars">
+              <div class="geo-bar">
+                <span class="geo-bar-tag">Lipstick</span>
+                <div class="geo-bar-fill lipstick"><div style="width: 100%;"></div></div>
+                <span class="geo-bar-val">₹1000</span>
+              </div>
+              <div class="geo-bar">
+                <span class="geo-bar-tag">Lip balm</span>
+                <div class="geo-bar-fill lipbalm"><div style="width: 90%;"></div></div>
+                <span class="geo-bar-val">₹900</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="callout-title">What this means for launch</div>
+        <div class="callout-body">
+          Anchor the price where the high-ASP shopper already sits, then price down just enough to bring the low-ASP shopper up &mdash; about 20% above where they sit today. High enough that we're not leaving money on the table at the top, low enough that we don't lose the value-catchment shopper at the bottom.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top: 0;">
+    <div class="wrap">
+      <div class="footer">Pricing · 2 of 3 · Next: Krystal Bloom →</div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================== -->
+<!-- ==========  KRYSTAL BLOOM  ==== -->
+<!-- ============================== -->
+<main class="page theme-kb" id="page-krystal-bloom" data-theme="kb">
+  <section class="kb-hero">
+    <div class="wrap">
+      <span class="eyebrow">Part two</span>
+      <h1>Krystal Bloom.</h1>
+      <p class="lede" style="margin-top: 28px; max-width: 720px;">
+        Gem-finish design — what shoppers saw, and what they said when light caught the surface. Premium signal, ownable motif, and a soft fragility shadow worth listening to.
+      </p>
+
+      <div class="sentiment-grid">
+        <div>
+          <div class="sentiment-num">94</div>
+          <div class="sentiment-label">Respondents on the<br>Krystal Bloom direction</div>
+        </div>
+        <div>
+          <div class="sentiment-num">33%</div>
+          <div class="sentiment-label">Volunteered the word<br><b>"premium"</b> unprompted</div>
+        </div>
+        <div>
+          <div class="sentiment-num">30%</div>
+          <div class="sentiment-label">Said they would<br>try or buy</div>
+        </div>
+        <div>
+          <div class="sentiment-num">1%</div>
+          <div class="sentiment-label">Volunteered the word<br><b>"cheap"</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORD CLOUD (second scroll) -->
+  <section>
+    <div class="wrap">
+      <div class="section-head" style="text-align: center; max-width: 100%;">
+        <span class="eyebrow">In their own words</span>
+        <h2>Krystal Bloom &middot; respondent vocabulary.</h2>
+        <p style="margin-top: 18px; color: var(--ink-soft); font-size: 16px; max-width: 600px; margin-left: auto; margin-right: auto;">
+          Sized by frequency across 98 KB transcripts. Words that lifted &ge;10 points vs Indipop in colour. Generic vocabulary muted.
+        </p>
+      </div>
+
+      <div class="wordcloud" id="kbCloud">
+        <!-- populated via JS -->
+      </div>
+      <div class="wordcloud-meta">
+        98 transcripts &middot; respondent text only &middot; 3,540 content words after filtering
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT TRIGGERED PREMIUM -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Why "premium" landed</span>
+        <h2>The crystal motif is doing real work.</h2>
+        <p style="margin-top: 18px; color: var(--ink-soft); font-size: 16px; max-width: 700px;">
+          Across 94 transcripts, the same descriptors come back: premium, attractive, quality, diamond, unique, cute. These are words shoppers reached for unprompted at materially higher rates than the comparison baseline.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="pullquote">
+            "It should have been even higher, because to me the product looked like it had a luxury finish."
+            <span class="pullquote-cite">Elpro Mall, Pune &middot; Hindi &middot; <em>shown the High Price tier</em></span>
+          </div>
+          <div class="pullquote">
+            "The eyeshadow palette &mdash; the glossy one &mdash; that one looks nice, and it seems like it will be good to use as well."
+            <span class="pullquote-cite">Hatibagan, Kolkata &middot; Hindi &middot; <em>on the eyeshadow palette</em></span>
+          </div>
+          <div class="pullquote">
+            "I really liked the lipsticks &mdash; the texture seems smooth, quite smooth."
+            <span class="pullquote-cite">BA-only &middot; English &middot; <em>on the lipstick</em></span>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="background: var(--paper-deep);">
+            <span class="eyebrow">Words used per 100 KB respondents</span>
+            <div style="margin-top: 20px;">
+              <div class="barchart-row">
+                <span class="barchart-label">packaging</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 100%;"></div></div>
+                <span class="barchart-value">192</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">attractive</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 27%;"></div></div>
+                <span class="barchart-value">51</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">quality</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 20%;"></div></div>
+                <span class="barchart-value">39</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">premium</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 15%;"></div></div>
+                <span class="barchart-value">29</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">unique</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 13%;"></div></div>
+                <span class="barchart-value">25</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">shape</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 10%;"></div></div>
+                <span class="barchart-value">19</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">diamond</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 7.5%;"></div></div>
+                <span class="barchart-value">14</span>
+              </div>
+            </div>
+            <p style="margin-top: 18px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-mute); letter-spacing: 0.08em;">
+              From 98 KB transcripts · respondent text only · stop-words removed
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DESIGN ELEMENTS -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">What shoppers named</span>
+        <h2>Four cues, one ownable signature.</h2>
+      </div>
+
+      <div class="elements">
+        <div class="element-card">
+          <div class="element-row">
+            <span class="element-name">Crystal / diamond shape</span>
+            <span class="element-pct">16%</span>
+          </div>
+          <p class="element-note">
+            Independently flagged as something they hadn't seen elsewhere. The shape is the most likely candidate for an ownable visual signature across the range.
+          </p>
+        </div>
+        <div class="element-card">
+          <div class="element-row">
+            <span class="element-name">Glass / glossy finish</span>
+            <span class="element-pct">9%</span>
+          </div>
+          <p class="element-note">
+            Reads as luxe — and reads as fragile. The same cue creates the appeal and the concern. See the section below.
+          </p>
+        </div>
+        <div class="element-card">
+          <div class="element-row">
+            <span class="element-name">Shape &amp; colour contrast</span>
+            <span class="element-pct">qualitative</span>
+          </div>
+          <p class="element-note">
+            "The shape and the colour contrast is one thing that people would definitely notice." — repeated, unprompted.
+          </p>
+        </div>
+        <div class="element-card">
+          <div class="element-row">
+            <span class="element-name">Embossed / patterned surface</span>
+            <span class="element-pct">qualitative</span>
+          </div>
+          <p class="element-note">
+            Pattern recognition was strong — described variously as "diamond," "crystal," "gem-like."
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKU LIKE-RATE -->
+  <section style="background: var(--paper-deep);">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Liked SKUs within Krystal Bloom</span>
+        <h2>Eyeshadow, lipstick, kajal lead.</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="chart-wrap">
+          <div class="chart-canvas-wrap">
+            <canvas id="kbSkuChart"></canvas>
+          </div>
+          <p style="margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.08em;">
+            Like-rate = liked mentions ÷ total mentions. Mentions: Lipstick=56, Blush=30, Kajal=26, Eyeshadow=23, Lip Balm=14, Skin Tint=6.
+          </p>
+        </div>
+        <div>
+          <div class="pullquote">
+            "The eyeshadow palette, the glossy one — that one looks nice, and it seems like it will be good to use as well."
+            <span class="pullquote-cite">On Eyeshadow</span>
+          </div>
+          <div class="pullquote">
+            "All three shades are good… personally I really like lipstick a lot."
+            <span class="pullquote-cite">On Lipstick</span>
+          </div>
+          <div class="pullquote">
+            "Yes, this eyeliner type looks very beautiful to me."
+            <span class="pullquote-cite">On Kajal / Liner</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCERNS -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">The fragility shadow</span>
+        <h2>Small in volume. Specific. Worth listening to.</h2>
+        <p style="margin-top: 18px; color: var(--ink-soft); font-size: 16px; max-width: 720px;">
+          Only 3% of KB respondents raised glass or fragility concerns. But these are reactions to a photograph — not a real prototype. With a physical product in hand, this signal is likely to amplify.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="concern-card">
+            <div class="concern-stat">3%</div>
+            <div class="concern-text">of KB respondents raised fragility / glass concerns. Concentrated at Elpro Mall (Pune) and BA-only Malayalam transcripts.</div>
+          </div>
+          <div class="concern-card">
+            <div class="concern-stat" style="font-size: 22px; line-height: 1.2;">Why it matters more than the number</div>
+            <div class="concern-text">
+              Photo-based testing under-represents tactile concerns. Weight, fragility, applicator feel — these emerge with the product in hand. Plan for prototype testing before launch.
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="pullquote">
+            "It's nice, eye-catching, but if the material is glass, then if it falls, it can break, right?"
+            <span class="pullquote-cite">Elpro Mall, Pune · Hindi</span>
+          </div>
+          <div class="pullquote">
+            "Like if they fall from your hand, they could crack or break."
+            <span class="pullquote-cite">Elpro Mall, Pune · Hindi</span>
+          </div>
+          <div class="pullquote">
+            "If it is a glass bottle, there is a tension that it might break if it falls down."
+            <span class="pullquote-cite">BA-only · Malayalam</span>
+          </div>
+          <div class="pullquote">
+            "Always go for a texture that gives a smooth, non-cracky look."
+            <span class="pullquote-cite">Tilak Nagar, Delhi · English</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KB PRICE EXPECTATIONS -->
+  <section style="background: var(--paper-deep);">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Price expectations within Krystal Bloom</span>
+        <h2>Lipstick lifts. Lip balm doesn't move.</h2>
+      </div>
+
+      <div class="chart-wrap">
+        <div class="chart-canvas-wrap" style="height: 380px;">
+          <canvas id="kbPriceChart"></canvas>
+        </div>
+        <p style="margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.08em;">
+          n: Lipstick=14, Eyeshadow=11, Kajal=10, Blush=9, Lip Balm=9, Skin Tint=1 (provisional · shown muted).
+        </p>
+      </div>
+
+      <div class="grid-2" style="margin-top: 30px;">
+        <div class="callout" style="background: rgba(139, 58, 82, 0.1);">
+          <div class="callout-title">Lipstick &middot; ~₹775 median</div>
+          <div class="callout-body">
+            Highest median across SKUs in the KB sample. The crystal motif is doing real work to lift lipstick into the upper range &mdash; though the spread is wide (₹500&ndash;1,000+ across 14 respondents).
+          </div>
+        </div>
+        <div class="callout" style="background: rgba(139, 58, 82, 0.1);">
+          <div class="callout-title">Lip balm &middot; ₹600 median</div>
+          <div class="callout-body">
+            Tied for lowest within KB. The KB design language doesn't lift lip balm pricing &mdash; category resistance is harder than aesthetic uplift.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top: 0;">
+    <div class="wrap">
+      <div class="footer">Krystal Bloom · 3 of 3 in part-two · Next: Indipop →</div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================== -->
+<!-- ==========  INDIPOP  ========= -->
+<!-- ============================== -->
+<main class="page theme-ip" id="page-indipop" data-theme="ip">
+  <section class="ip-hero">
+    <div class="wrap">
+      <span class="eyebrow">Part three</span>
+      <h1>Indipop.</h1>
+      <p class="lede" style="margin-top: 28px; max-width: 720px;">
+        Everyday-utility design — what shoppers saw, and what they said when something looked like it belonged in their everyday. Different, daily, and theirs.
+      </p>
+
+      <div class="sentiment-grid">
+        <div>
+          <div class="sentiment-num">96</div>
+          <div class="sentiment-label">Respondents on the<br>Indipop direction</div>
+        </div>
+        <div>
+          <div class="sentiment-num">32%</div>
+          <div class="sentiment-label">Volunteered the word<br><b>"different"</b> unprompted</div>
+        </div>
+        <div>
+          <div class="sentiment-num">51%</div>
+          <div class="sentiment-label">Praised the<br>colour combinations</div>
+        </div>
+        <div>
+          <div class="sentiment-num">0%</div>
+          <div class="sentiment-label">Volunteered the word<br><b>"cheap"</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORD CLOUD (second scroll) -->
+  <section style="background: var(--paper-deep);">
+    <div class="wrap">
+      <div class="section-head" style="text-align: center; max-width: 100%;">
+        <span class="eyebrow">In their own words</span>
+        <h2>Indipop &middot; respondent vocabulary.</h2>
+        <p style="margin-top: 18px; color: var(--ink-soft); font-size: 16px; max-width: 600px; margin-left: auto; margin-right: auto;">
+          Sized by frequency across 85 IP transcripts. Words that lifted &ge;10 points vs Krystal Bloom in colour. Generic vocabulary muted.
+        </p>
+      </div>
+
+      <div class="wordcloud" id="ipCloud">
+        <!-- populated via JS -->
+      </div>
+      <div class="wordcloud-meta">
+        85 transcripts &middot; respondent text only &middot; 2,807 content words after filtering
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT MAKES IP "DIFFERENT" -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Why "different" landed</span>
+        <h2>Format experimentation plus a daily-wear identity.</h2>
+        <p style="margin-top: 18px; color: var(--ink-soft); font-size: 16px; max-width: 700px;">
+          Across 96 transcripts, the descriptors were: different, sober, daily-wear, pink, simple, aesthetic. Not premium signals &mdash; utility signals.
+        </p>
+      </div>
+
+      <p style="font-family: 'Fraunces', serif; font-style: italic; font-size: clamp(1.5rem, 3.2vw, 2.4rem); line-height: 1.25; color: var(--accent); max-width: 880px; margin: 30px auto 60px; text-align: center; font-weight: 400;">
+        Indipop reads as something that belongs in a real makeup bag.
+      </p>
+
+      <div class="grid-2">
+        <div>
+          <div class="pullquote">
+            "It's a lip balm, but it's a slider &mdash; and the packaging is good."
+            <span class="pullquote-cite">Tilak Nagar, Delhi &middot; Hindi &middot; <em>on the lip balm</em></span>
+          </div>
+          <div class="pullquote">
+            "It's a little sober, and I really liked the tint packaging inside it."
+            <span class="pullquote-cite">Tilak Nagar, Delhi &middot; Hindi &middot; <em>on the tint</em></span>
+          </div>
+          <div class="pullquote">
+            "In lipsticks, I love the packaging &mdash; and I believe the pricing should be affordable."
+            <span class="pullquote-cite">Tilak Nagar, Delhi &middot; Hindi &middot; <em>on the lipstick</em></span>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="background: var(--paper-deep);">
+            <span class="eyebrow">Words used per 100 IP respondents</span>
+            <div style="margin-top: 20px;">
+              <div class="barchart-row">
+                <span class="barchart-label">packaging</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 100%;"></div></div>
+                <span class="barchart-value">109</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">attractive</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 35%;"></div></div>
+                <span class="barchart-value">38</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">different</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 30%;"></div></div>
+                <span class="barchart-value">32</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">quality</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 17%;"></div></div>
+                <span class="barchart-value">19</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">love</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 17%;"></div></div>
+                <span class="barchart-value">19</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">premium</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 17%;"></div></div>
+                <span class="barchart-value">19</span>
+              </div>
+              <div class="barchart-row">
+                <span class="barchart-label">affordable</span>
+                <div class="barchart-bar-wrap"><div class="barchart-bar" style="width: 16%;"></div></div>
+                <span class="barchart-value">18</span>
+              </div>
+            </div>
+            <p style="margin-top: 18px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink-mute); letter-spacing: 0.08em;">
+              From 85 IP transcripts · respondent text only · stop-words removed
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DESIGN ELEMENTS -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Where Indipop's appeal lives</span>
+        <h2>Colour combinations and format variety lead.</h2>
+      </div>
+
+      <div class="elements">
+        <div class="element-card">
+          <div class="element-row">
+            <span class="element-name">Colour combination</span>
+            <span class="element-pct">51%</span>
+          </div>
+          <p class="element-note">
+            Highest single-theme prevalence in the IP sample. Shoppers consistently flagged colour palette as the first thing they noticed.
+          </p>
+        </div>
+        <div class="element-card">
+          <div class="element-row">
+            <span class="element-name">Shade range</span>
+            <span class="element-pct">qualitative</span>
+          </div>
+          <p class="element-note">
+            "Good wide range of shades" / "shades are available, so that's a better option." Especially in BB tint, where range was a positive surprise.
+          </p>
+        </div>
+        <div class="element-card">
+          <div class="element-row">
+            <span class="element-name">Format experimentation</span>
+            <span class="element-pct">qualitative</span>
+          </div>
+          <p class="element-note">
+            Tubes, tic-tac sticks, push-up forms — IP design language is multi-format. Shoppers read this as "different."
+          </p>
+        </div>
+        <div class="element-card">
+          <div class="element-row">
+            <span class="element-name">Office / everyday fit</span>
+            <span class="element-pct">9%</span>
+          </div>
+          <p class="element-note">
+            Daily-wear and "sober" descriptors used 9× more often than for the comparison set baseline.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKU LIKE-RATE -->
+  <section style="background: var(--paper-deep);">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">SKUs shoppers liked within Indipop</span>
+        <h2>Lip balm, blush and lipstick lead.</h2>
+      </div>
+
+      <div class="grid-2">
+        <div class="chart-wrap">
+          <div class="chart-canvas-wrap">
+            <canvas id="ipSkuChart"></canvas>
+          </div>
+          <p style="margin-top: 14px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.08em;">
+            Mentions: Lip Balm=42, Blush=37, Lipstick=35, Kajal=18, Eyeshadow=16, Skin Tint=11, Lip Tint=3 (shown muted).
+          </p>
+        </div>
+        <div>
+          <div class="pullquote">
+            "But this lip balm, right, that is good&hellip; The shade you have given is very beautiful."
+            <span class="pullquote-cite">On Lip Balm</span>
+          </div>
+          <div class="pullquote">
+            "I love this blush, honestly."
+            <span class="pullquote-cite">On Blush</span>
+          </div>
+          <div class="pullquote">
+            "What you said, the lipstick and lip balm &mdash; I haven't seen anything like that yet."
+            <span class="pullquote-cite">On Lipstick</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCERNS -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">The shade-loudness signal</span>
+        <h2>Friction is in selection — not packaging.</h2>
+        <p style="margin-top: 18px; color: var(--ink-soft); font-size: 16px; max-width: 720px;">
+          Where shoppers pushed back on Indipop, it was rarely about the design language itself — it was about specific shades being too loud for daily use. A solvable, mix-related problem.
+        </p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="pullquote">
+            "If we take blue colour, we can't use that on a daily basis."
+            <span class="pullquote-cite">Sagarpur, Delhi · Hindi</span>
+          </div>
+          <div class="pullquote">
+            "There was a green-coloured shadow; we can't carry green colour daily, or loud pink colour."
+            <span class="pullquote-cite">Sagarpur, Delhi · Hindi</span>
+          </div>
+          <div class="pullquote">
+            "Even if you make a four-in-one palette, there should be at least one colour we can use on a daily basis."
+            <span class="pullquote-cite">Sagarpur, Delhi · Hindi</span>
+          </div>
+        </div>
+        <div>
+          <div class="callout">
+            <div class="callout-title">What this is, and isn't</div>
+            <div class="callout-body" style="margin-bottom: 10px;">
+              <b>It is:</b> a shade-mix concern, especially in palettes and statement shades. Shoppers want one daily-wear option in every multi-shade SKU.
+            </div>
+            <div class="callout-body">
+              <b>It isn't:</b> a critique of the Indipop direction itself. The packaging, the format, and the range concept are all clearing. The friction sits at the shade-curation layer.
+            </div>
+          </div>
+          <div class="callout" style="margin-top: 20px;">
+            <div class="callout-title">Price expectations within IP</div>
+            <div class="callout-body">
+              Per-SKU IP price expectations sit at or slightly below the all-direction medians shown in the Pricing section. Per-SKU samples are small (Lipstick n=21, Lip Balm n=21, Blush n=15, Kajal n=14, Eyeshadow n=14, Skin Tint n=7) &mdash; treat as directional.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top: 0;">
+    <div class="wrap">
+      <div class="footer">Indipop · Final part · Next: Takeaway →</div>
+    </div>
+  </section>
+</main>
+
+<!-- ============================== -->
+<!-- ==========  TAKEAWAY  ========= -->
+<!-- ============================== -->
+<main class="page" id="page-takeaway" data-theme="">
+  <section style="padding-top: 60px;">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Closing</span>
+        <h1>What to hold onto.</h1>
+        <p class="lede" style="margin-top: 24px; max-width: 760px;">
+          Both directions are loved — for fundamentally different reasons. Reading them as competitors is the wrong frame. Each opens a distinct shelf-position and a distinct shopper conversation.
+        </p>
+      </div>
+
+      <div class="closing-blocks">
+        <div class="closing-block kb">
+          <span class="eyebrow" style="color: #8b3a52;">Krystal Bloom is loved because…</span>
+          <h3>It signals luxury before they touch it.</h3>
+          <div class="closing-line">
+            "It looked like it had a luxury finish."
+          </div>
+          <ul>
+            <li><b>Premium</b> reached for unprompted by 33%</li>
+            <li><b>Diamond / crystal</b> motif is ownable and fresh</li>
+            <li><b>Lipstick</b> sits comfortably at <span style="white-space:nowrap;">~₹775</span> median in this direction</li>
+            <li><b>Headroom</b> exists at the high-tier price point</li>
+            <li><b>Watch:</b> 3% glass / fragility shadow likely amplifies with prototype</li>
+          </ul>
+        </div>
+        <div class="closing-block ip">
+          <span class="eyebrow" style="color: #7b5a3a;">Indipop is loved because&hellip;</span>
+          <h3>It belongs in a real makeup bag.</h3>
+          <div class="closing-line">
+            "Simple, daily, the kind of thing that just slides into your routine."
+          </div>
+          <ul>
+            <li><b>Different</b> reached for unprompted by 32%</li>
+            <li><b>Colour combinations</b> praised by 51%</li>
+            <li><b>Format variety</b> (tic-tac, tube, slider) reads as fresh and low-friction</li>
+            <li><b>Daily-wear</b> identity is an open lane competitors haven't owned</li>
+            <li><b>Watch:</b> shade-loudness pushback in palettes &mdash; needs one safe option per SKU</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="margin-top: 80px;">
+        <div class="section-head">
+          <span class="eyebrow">Three honest caveats</span>
+          <h2>What this data is — and isn't.</h2>
+        </div>
+
+        <div class="caveat">
+          <div class="caveat-num">1</div>
+          <div>
+            <div class="caveat-title">BA-mediated, in-store, face-to-face.</div>
+            <div class="caveat-body">
+              Indian retail face-to-face yields very few explicit "no" answers. Treat both positive and negative numbers as relative, not absolute. Real conversion will be lower than reported intent.
+            </div>
+          </div>
+        </div>
+        <div class="caveat">
+          <div class="caveat-num">2</div>
+          <div>
+            <div class="caveat-title">Photo, not prototype.</div>
+            <div class="caveat-body">
+              Shoppers reacted to images of packaging, not physical products. Tactile concerns — weight, fragility, applicator feel — are likely under-counted. The KB fragility signal is the most important one to re-test in hand.
+            </div>
+          </div>
+        </div>
+        <div class="caveat">
+          <div class="caveat-num">3</div>
+          <div>
+            <div class="caveat-title">Question coverage was uneven.</div>
+            <div class="caveat-body">
+              BAs paraphrased and switched languages mid-question. Q1, Q3, Q4 were directly answered in only 25–42% of transcripts. Thematic coding compensates by mining the full respondent text — but per-SKU samples below n=15 (flagged in muted type throughout) should be read as directional only.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 100px; padding: 60px 24px; background: var(--accent-soft); border-radius: 6px;">
+        <span class="eyebrow" style="color: var(--accent);">In one line</span>
+        <p style="font-family: 'Fraunces', serif; font-style: italic; font-size: clamp(1.4rem, 3vw, 2.2rem); line-height: 1.3; color: var(--ink); max-width: 760px; margin: 18px auto 0; font-weight: 400;">
+          Krystal Bloom signals luxury before they touch it.<br>
+          Indipop belongs in a real makeup bag.<br>
+          <span style="color: var(--accent);">Both are loved &mdash; for reasons that don't compete.</span>
+        </p>
+        <p style="margin-top: 36px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--ink-mute); letter-spacing: 0.14em; text-transform: uppercase;">
+          Purplle &middot; JKB Concept Test &middot; 2026
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top: 0;">
+    <div class="wrap">
+      <div class="footer">End of readout</div>
+    </div>
+  </section>
+</main>
+
+<!-- ==========  JS  ========== -->
+<script>
+/* ==========  ROUTING  ========== */
+const pages = ['home', 'methodology', 'pricing', 'krystal-bloom', 'indipop', 'takeaway'];
+const navLinks = document.querySelectorAll('.nav-links a');
+const navEl = document.getElementById('nav');
+
+function setTheme(pageId) {
+  // Strip existing theme class on body, set based on page
+  document.body.classList.remove('theme-kb', 'theme-ip');
+  if (pageId === 'krystal-bloom') document.body.classList.add('theme-kb');
+  else if (pageId === 'indipop') document.body.classList.add('theme-ip');
+}
+
+function showPage(pageId) {
+  if (!pages.includes(pageId)) pageId = 'home';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-' + pageId);
+  if (page) page.classList.add('active');
+  navLinks.forEach(l => {
+    l.classList.toggle('active', l.dataset.page === pageId);
+  });
+  setTheme(pageId);
+  // close mobile nav
+  document.getElementById('navLinks').classList.remove('open');
+  // scroll to top
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  // initialize charts on first view of that page
+  initChartsForPage(pageId);
+  initWordCloudsForPage(pageId);
+}
+
+function getPageFromHash() {
+  const hash = window.location.hash.replace('#', '').trim();
+  return pages.includes(hash) ? hash : 'home';
+}
+
+window.addEventListener('hashchange', () => showPage(getPageFromHash()));
+
+document.getElementById('navToggle').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+/* ==========  EXPERIENCE GALLERY  ========== */
+let currentDir = 'kb';   // 'kb' | 'ip'
+let currentPrice = 'No-Price';
+
+const dirMap = { kb: 'Krystal-Bloom', ip: 'IndiPop' };
+
+function updateExpFrame() {
+  const slug = `${dirMap[currentDir]}-${currentPrice}`;
+  const url = `https://lucid-by-purplle.github.io/${slug}/`;
+  document.getElementById('expFrame').src = url;
+  document.getElementById('expUrl').textContent = url.replace('https://', '');
+  document.getElementById('expOpen').href = url;
+}
+
+document.querySelectorAll('.exp-tab[data-dir]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.exp-tab[data-dir]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentDir = btn.dataset.dir;
+    updateExpFrame();
+  });
+});
+
+document.querySelectorAll('.exp-tab[data-price]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.exp-tab[data-price]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPrice = btn.dataset.price;
+    updateExpFrame();
+  });
+});
+
+/* ==========  CHARTS  ========== */
+const chartsInitialized = {};
+
+const baseChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  animation: { duration: 1100, easing: 'easeOutCubic' },
+  plugins: {
+    legend: {
+      labels: {
+        font: { family: 'DM Mono', size: 11 },
+        color: '#4a463e',
+        boxWidth: 12,
+      }
+    },
+    tooltip: {
+      backgroundColor: '#1c1a17',
+      titleFont: { family: 'Fraunces', size: 13 },
+      bodyFont: { family: 'DM Mono', size: 12 },
+      padding: 10,
+    }
+  }
+};
+
+function initChartsForPage(pageId) {
+  if (chartsInitialized[pageId]) return;
+  chartsInitialized[pageId] = true;
+
+  if (pageId === 'pricing') {
+    initExpectedChart();
+    initHeadroomChart();
+  } else if (pageId === 'krystal-bloom') {
+    initKbSkuChart();
+    initKbPriceChart();
+  } else if (pageId === 'indipop') {
+    initIpSkuChart();
+  }
+}
+
+function initExpectedChart() {
+  const ctx = document.getElementById('expectedChart');
+  if (!ctx) return;
+  // Bar colours: muted for thin samples (skin tint n=8)
+  const dataPoints = [
+    { sku: 'Lipstick', val: 750, n: 32, thin: false },
+    { sku: 'Lip Balm', val: 700, n: 30, thin: false },
+    { sku: 'Kajal',    val: 600, n: 28, thin: false },
+    { sku: 'Blush',    val: 749, n: 26, thin: false },
+    { sku: 'Eyeshadow', val: 749, n: 25, thin: false },
+    { sku: 'Skin Tint', val: 800, n: 8,  thin: true  },
+  ];
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: dataPoints.map(d => d.sku + ` (n=${d.n})`),
+      datasets: [{
+        label: 'Median ₹ expected',
+        data: dataPoints.map(d => d.val),
+        backgroundColor: dataPoints.map(d => d.thin ? '#a8a397' : '#6b1c2c'),
+        borderRadius: 0,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      ...baseChartOptions,
+      plugins: {
+        ...baseChartOptions.plugins,
+        legend: { display: false },
+        tooltip: {
+          ...baseChartOptions.plugins.tooltip,
+          callbacks: {
+            label: (ctx) => `₹${ctx.raw} median`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: 'DM Mono', size: 11 }, color: '#4a463e' }
+        },
+        y: {
+          grid: { color: '#d4cdba', drawBorder: false },
+          ticks: {
+            font: { family: 'DM Mono', size: 11 },
+            color: '#4a463e',
+            callback: (v) => '₹' + v
+          }
+        }
+      }
+    }
+  });
+}
+
+function initHeadroomChart() {
+  const ctx = document.getElementById('headroomChart');
+  if (!ctx) return;
+  const data = [
+    { sku: 'Kajal',     low: 450, lowN: 3,  high: 800, highN: 9  },
+    { sku: 'Blush',     low: 600, lowN: 10, high: 749, highN: 9  },
+    { sku: 'Eyeshadow', low: 750, lowN: 3,  high: 1000, highN: 8 },
+  ];
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.sku),
+      datasets: [
+        {
+          label: 'Shown Low tier',
+          data: data.map(d => d.low),
+          backgroundColor: '#c2945c',
+          borderRadius: 0,
+        },
+        {
+          label: 'Shown High tier',
+          data: data.map(d => d.high),
+          backgroundColor: '#6b1c2c',
+          borderRadius: 0,
+        }
+      ]
+    },
+    options: {
+      ...baseChartOptions,
+      plugins: {
+        ...baseChartOptions.plugins,
+        tooltip: {
+          ...baseChartOptions.plugins.tooltip,
+          callbacks: {
+            label: (ctx) => {
+              const d = data[ctx.dataIndex];
+              const n = ctx.datasetIndex === 0 ? d.lowN : d.highN;
+              return `${ctx.dataset.label}: ₹${ctx.raw} (n=${n})`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#4a463e' } },
+        y: {
+          grid: { color: '#d4cdba', drawBorder: false },
+          ticks: {
+            font: { family: 'DM Mono', size: 11 },
+            color: '#4a463e',
+            callback: (v) => '₹' + v
+          }
+        }
+      }
+    }
+  });
+}
+
+function initKbSkuChart() {
+  const ctx = document.getElementById('kbSkuChart');
+  if (!ctx) return;
+  const data = [
+    { sku: 'Eyeshadow',  rate: 91, n: 23 },
+    { sku: 'Lipstick',   rate: 73, n: 56 },
+    { sku: 'Kajal',      rate: 73, n: 26 },
+    { sku: 'Blush',      rate: 67, n: 30 },
+    { sku: 'Skin Tint',  rate: 67, n: 6, thin: true },
+    { sku: 'Lip Balm',   rate: 50, n: 14 },
+  ];
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => `${d.sku} (n=${d.n})`),
+      datasets: [{
+        label: 'Like-rate %',
+        data: data.map(d => d.rate),
+        backgroundColor: data.map(d => d.thin ? '#b89aa3' : '#8b3a52'),
+        borderRadius: 0,
+      }]
+    },
+    options: {
+      ...baseChartOptions,
+      indexAxis: 'y',
+      plugins: { ...baseChartOptions.plugins, legend: { display: false } },
+      scales: {
+        x: {
+          max: 100,
+          grid: { color: '#e7cdd6', drawBorder: false },
+          ticks: { font: { family: 'DM Mono', size: 11 }, color: '#5a3949', callback: v => v + '%' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { family: 'Fraunces', size: 14 }, color: '#2d1a23' }
+        }
+      }
+    }
+  });
+}
+
+function initKbPriceChart() {
+  const ctx = document.getElementById('kbPriceChart');
+  if (!ctx) return;
+  const data = [
+    { sku: 'Lipstick',  val: 775, n: 14, thin: false },
+    { sku: 'Eyeshadow', val: 700, n: 11, thin: false },
+    { sku: 'Kajal',     val: 600, n: 10, thin: false },
+    { sku: 'Blush',     val: 600, n: 9,  thin: true  },
+    { sku: 'Lip Balm',  val: 600, n: 9,  thin: true  },
+    { sku: 'Skin Tint', val: 800, n: 1,  thin: true  },
+  ];
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => `${d.sku} (n=${d.n})`),
+      datasets: [{
+        label: 'KB median ₹ expected',
+        data: data.map(d => d.val),
+        backgroundColor: data.map(d => d.thin ? '#b89aa3' : '#8b3a52'),
+        borderRadius: 0,
+      }]
+    },
+    options: {
+      ...baseChartOptions,
+      plugins: { ...baseChartOptions.plugins, legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { family: 'DM Mono', size: 11 }, color: '#5a3949' } },
+        y: {
+          grid: { color: '#e7cdd6', drawBorder: false },
+          ticks: { font: { family: 'DM Mono', size: 11 }, color: '#5a3949', callback: v => '₹' + v }
+        }
+      }
+    }
+  });
+}
+
+function initIpSkuChart() {
+  const ctx = document.getElementById('ipSkuChart');
+  if (!ctx) return;
+  // From deck slide 20: mention counts. Like rates inferable from chart positions.
+  const data = [
+    { sku: 'Lip Balm',   rate: 79, n: 42 },
+    { sku: 'Blush',      rate: 70, n: 37 },
+    { sku: 'Lipstick',   rate: 69, n: 35 },
+    { sku: 'Eyeshadow',  rate: 69, n: 16 },
+    { sku: 'Kajal',      rate: 61, n: 18 },
+    { sku: 'Skin Tint',  rate: 55, n: 11 },
+    { sku: 'Lip Tint',   rate: 67, n: 3, thin: true },
+  ];
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => `${d.sku} (n=${d.n})`),
+      datasets: [{
+        label: 'Like-rate %',
+        data: data.map(d => d.rate),
+        backgroundColor: data.map(d => d.thin ? '#beb491' : '#7b5a3a'),
+        borderRadius: 0,
+      }]
+    },
+    options: {
+      ...baseChartOptions,
+      indexAxis: 'y',
+      plugins: { ...baseChartOptions.plugins, legend: { display: false } },
+      scales: {
+        x: {
+          max: 100,
+          grid: { color: '#cec5ad', drawBorder: false },
+          ticks: { font: { family: 'DM Mono', size: 11 }, color: '#4f4838', callback: v => v + '%' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { family: 'Fraunces', size: 14 }, color: '#2a261d' }
+        }
+      }
+    }
+  });
+}
+
+/* ==========  WORD CLOUDS  ========== */
+const KB_WORDS = [
+  // word, count, isSignature (lift > 10 vs IP)
+  ['packaging', 188, true],
+  ['liked', 51, true],
+  ['attractive', 50, true],
+  ['quality', 38, true],
+  ['premium', 28, false],
+  ['unique', 24, true],
+  ['shape', 19, true],
+  ['texture', 17, true],
+  ['affordable', 17, false],
+  ['diamond', 14, true],
+  ['high', 12, true],
+  ['cute', 12, false],
+  ['makeup', 12, false],
+  ['liner', 11, true],
+  ['whether', 11, true],
+  ['carry', 11, false],
+  ['seems', 10, true],
+  ['lower', 10, true],
+  ['easy', 10, true],
+  ['pick', 10, true],
+  ['higher', 10, false],
+  ['glass', 8, true],
+  ['expensive', 8, true],
+  ['eyeliner', 8, true],
+  ['notice', 8, true],
+  ['finish', 8, true],
+  ['crystal', 8, false],
+];
+
+const IP_WORDS = [
+  ['packaging', 93, false],
+  ['attractive', 32, false],
+  ['different', 27, true],
+  ['liked', 24, false],
+  ['love', 16, true],
+  ['quality', 16, false],
+  ['premium', 16, false],
+  ['affordable', 15, false],
+  ['unique', 12, false],
+  ['double', 10, true],
+  ['skin', 10, false],
+  ['used', 8, false],
+  ['worth', 8, true],
+  ['sliding', 7, true],
+  ['daily', 7, true],
+  ['available', 7, true],
+  ['korean', 7, true],
+  ['noticed', 7, false],
+  ['best', 7, false],
+  ['cute', 7, false],
+  ['apply', 6, true],
+  ['stick', 6, true],
+  ['gives', 6, true],
+  ['work', 6, true],
+  ['beautiful', 6, false],
+  ['keep', 6, true],
+  ['logo', 5, true],
+  ['purple', 5, true],
+  ['talk', 5, true],
+];
+
+function buildCloud(elementId, words) {
+  const el = document.getElementById(elementId);
+  if (!el || el.dataset.built === '1') return;
+  el.dataset.built = '1';
+  el.innerHTML = '';
+  // Determine size scale: max count -> 5rem, min count -> 0.95rem
+  const counts = words.map(w => w[1]);
+  const max = Math.max(...counts);
+  const min = Math.min(...counts);
+  const minSize = 0.95;
+  const maxSize = 4.6;
+  // Shuffle for organic placement, but keep top 1-2 in middle by sorting differently
+  const shuffled = [...words].sort(() => Math.random() - 0.5);
+  shuffled.forEach(([word, count, signature]) => {
+    const size = minSize + (maxSize - minSize) * Math.pow((count - min) / Math.max(1, max - min), 0.55);
+    const span = document.createElement('span');
+    span.className = 'wc-word' + (signature ? '' : ' dim');
+    span.textContent = word;
+    span.style.fontSize = size.toFixed(2) + 'rem';
+    span.style.fontWeight = signature ? '500' : '400';
+    if (signature) {
+      span.style.fontStyle = count > 30 ? 'italic' : 'normal';
+    }
+    span.title = `${count} mentions`;
+    el.appendChild(span);
+  });
+}
+
+function initWordCloudsForPage(pageId) {
+  if (pageId === 'krystal-bloom') buildCloud('kbCloud', KB_WORDS);
+  if (pageId === 'indipop') buildCloud('ipCloud', IP_WORDS);
+}
+
+/* ==========  KICKOFF — runs after all defs above  ========== */
+showPage(getPageFromHash());
+</script>
+</body>
+</html>
